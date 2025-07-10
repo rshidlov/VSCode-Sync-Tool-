@@ -7,20 +7,22 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import tempfile
+import zipfile
 import typer
+
 
 from . import config
 from . import presets
 
-app = typer.Typer(
-    help="VSCode Sync Tool: Export, import, and share your VSCode settings and extensions."
-)
+app = typer.Typer(help="VSCode Sync Tool: Export, import, and share your VSCode settings and extensions.")
 
 IDE_CHOICE: Optional[str] = None
 
 
 def select_ide() -> None:
     """Prompt the user to select which IDE CLI to use (VSCode or Cursor)."""
+    # pylint: disable=global-statement
     global IDE_CHOICE
     vscode_installed = shutil.which("code") is not None
     cursor_installed = shutil.which("cursor") is not None
@@ -66,17 +68,19 @@ def check_cli_tools() -> bool:
             response = input().strip().lower()
             if response == "y":
                 try:
-                    subprocess.run([
-                        "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-                        "--install-shell-command",
-                    ], check=True)
+                    subprocess.run(
+                        [
+                            "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+                            "--install-shell-command",
+                        ],
+                        check=True,
+                    )
                     typer.echo("'code' command installed. Please restart your terminal and try again.")
                 except (OSError, subprocess.SubprocessError) as e:
                     typer.echo(f"Failed to run install command: {e}")
             raise typer.Exit(code=1)
-        else:
-            typer.echo(f"Please install '{IDE_CHOICE}' and try again.")
-            raise typer.Exit(code=1)
+        typer.echo(f"Please install '{IDE_CHOICE}' and try again.")
+        raise typer.Exit(code=1)
     return True
 
 
@@ -114,8 +118,13 @@ def status() -> None:
 
 
 @app.command()
-def export(output: str) -> None:
-    """Export configuration to a file (JSON or ZIP)."""
+def export(
+    output: str = typer.Argument(..., help="Path to the output ZIP file."),
+    output_dir: Optional[str] = typer.Option(
+        None, help="Directory to save intermediate files (default: temp dir)."
+    ),
+) -> None:
+    """Export configuration to a ZIP file (JSON only, assumes all extensions are from the Marketplace)."""
     if not check_cli_tools():
         return
     try:
@@ -138,24 +147,34 @@ def export(output: str) -> None:
                 settings = json.load(f)
         except (OSError, json.JSONDecodeError) as e:
             typer.echo(f"Failed to read settings: {e}")
+    if output_dir:
+        out_dir = Path(output_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        out_dir = Path(tempfile.mkdtemp())
     data = {
         "metadata": {
-            "created_at": __import__('datetime').datetime.now().isoformat(timespec='seconds'),
+            "created_at": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
             "system": config.get_os().capitalize(),
             "vscode_sync_version": "0.1.0",
         },
         "extensions": extensions,
         "settings": settings,
     }
+    json_path = Path(out_dir, "vscode_sync_export.json")
     try:
-        with open(output, "w", encoding="utf-8") as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
-        typer.echo(f"Exported configuration to {output}")
     except (OSError, json.JSONDecodeError) as e:
         typer.echo(f"Failed to write export file: {e}")
+        return
+    output_final = Path(out_dir, output)
+    with zipfile.ZipFile(output_final, "w") as zipf:
+        zipf.write(json_path, arcname="vscode_sync_export.json")
+    typer.echo(f"Exported configuration to {output_final}")
 
 
-@app.command()
+@app.command(name="import")
 def import_(
     input_file: str,
     no_extensions: bool = typer.Option(False, help="Do not install extensions."),
@@ -265,24 +284,23 @@ def wizard() -> None:
             key = input("Enter setting key (or 'done'): ").strip()
             if key == "done":
                 break
-            value = input(f"Enter value for {key}: ").strip()
-            if value.lower() in ["true", "false"]:
-                value = value.lower() == "true"
+            value_str = input(f"Enter value for {key}: ").strip()
+            if value_str.lower() in ["true", "false"]:
+                value: Any = value_str.lower() == "true"
             else:
                 try:
-                    value = int(value)
+                    value = int(value_str)
                 except ValueError:
                     try:
-                        value = float(value)
+                        value = float(value_str)
                     except ValueError:
-                        pass
+                        value = value_str
             settings[key] = value
             typer.echo(f"Set {key} = {value}")
     typer.echo("\nSummary:")
     typer.echo(f"Extensions: {extensions}")
     typer.echo(f"Settings: {settings}")
     if input("Apply this configuration? [Y/n]: ").strip().lower() in ["", "y", "yes"]:
-        import tempfile
         with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as tmp:
             json.dump({"extensions": extensions, "settings": settings}, tmp, indent=2)
             tmp_path = tmp.name
@@ -301,20 +319,24 @@ def list_repos() -> None:
     recent_paths: List[str] = []
     if IDE_CHOICE == "code":
         if os_type == "macos":
-            recent_json = Path.home() / "Library/Application Support/Code/User/globalStorage/storage.json"
-            recent_workspaces = Path.home() / "Library/Application Support/Code/storage.json"
+            recent_json: Optional[Path] = (
+                Path.home() / "Library/Application Support/Code/User/globalStorage/storage.json"
+            )
+            recent_workspaces: Optional[Path] = Path.home() / "Library/Application Support/Code/storage.json"
         elif os_type == "windows":
             appdata = os.environ.get("APPDATA")
             if appdata:
                 recent_json = Path(appdata) / "Code/User/globalStorage/storage.json"
                 recent_workspaces = Path(appdata) / "Code/storage.json"
             else:
-                recent_json = recent_workspaces = None
+                recent_json = None
+                recent_workspaces = None
         elif os_type == "linux":
             recent_json = Path.home() / ".config/Code/User/globalStorage/storage.json"
             recent_workspaces = Path.home() / ".config/Code/storage.json"
         else:
-            recent_json = recent_workspaces = None
+            recent_json = None
+            recent_workspaces = None
         found = False
         for f in [recent_json, recent_workspaces]:
             if f and f.exists():

@@ -1,1 +1,1 @@
-"""Unit tests package for VSCode Sync Tool.""" 
+"""Unit tests package for VSCode Sync Tool."""
