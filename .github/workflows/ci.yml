@@ -28,6 +28,10 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
+      - name: Ensure lint/test/typecheck tools are installed
+        run: |
+          pip install pylint mypy pytest
+
       - name: Lint with pylint
         run: |
           pylint vscode_sync/main.py tests/test_main.py
