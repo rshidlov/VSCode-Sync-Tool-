@@ -1,1 +1,1 @@
- 
+"""VSCode Sync Tool package."""
