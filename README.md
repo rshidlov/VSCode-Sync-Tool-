@@ -16,7 +16,7 @@ A cross-platform CLI tool to export, import, and share your VSCode settings and 
 ### From Source
 
 ```bash
-git clone https://github.com/roei-shidlovsky/vscode-sync.git
+git clone https://github.com/rshidlov/VSCode-Sync-Tool-.git
 cd vscode-sync
 pip install -r requirements.txt
 python -m vscode_sync.main --help
