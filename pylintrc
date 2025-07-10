@@ -1,0 +1,11 @@
+[MASTER]
+# Specify a configuration for pylint
+
+[FORMAT]
+max-line-length=110
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116   # missing-function-docstring 
