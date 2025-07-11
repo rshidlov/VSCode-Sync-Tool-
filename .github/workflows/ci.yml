@@ -24,22 +24,27 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd cli
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
       - name: Ensure lint/test/typecheck tools are installed
         run: |
+          cd cli
           pip install pylint mypy pytest
 
       - name: Lint with pylint
         run: |
+          cd cli
           pylint vscode_sync/main.py tests/test_main.py
 
       - name: Type check with mypy
         run: |
+          cd cli
           mypy vscode_sync/main.py tests/test_main.py
 
       - name: Run tests with pytest
         run: |
+          cd cli
           pytest -v
