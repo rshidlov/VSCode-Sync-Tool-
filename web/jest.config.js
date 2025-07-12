@@ -11,7 +11,6 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
-    '^@/lib/supabaseClient$': '<rootDir>/lib/supabaseClient.ts',
     '^@/(.*)$': '<rootDir>/$1',
   },
 };
