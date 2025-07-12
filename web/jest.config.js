@@ -10,4 +10,7 @@ module.exports = {
     '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleNameMapper: {
+    '^../../../lib/supabaseClient$': '<rootDir>/lib/supabaseClient.ts',
+  },
 };
