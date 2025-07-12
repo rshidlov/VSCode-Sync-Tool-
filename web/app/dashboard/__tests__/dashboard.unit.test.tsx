@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import DashboardPage from '../page';
 
 // Move mocks inside jest.mock factory and prefix with 'mock'
-jest.mock('../../../lib/supabaseClient.ts', () => {
+jest.mock('../../../lib/supabaseClient', () => {
   // Create a chainable mock object
   const chain = {} as any;
   // These will be replaced in beforeEach
@@ -81,7 +81,7 @@ jest.mock('next/navigation', () => ({
 // Helper to access mocks
 const getSupabaseMocks = () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require('../../../lib/supabaseClient.ts').__mocks;
+  return require('../../../lib/supabaseClient').__mocks;
 };
 
 describe('DashboardPage Unit', () => {
