@@ -1,0 +1,41 @@
+name: Web App CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/**"
+
+jobs:
+  test-web-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd web
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd web
+          npm test
+
+      - name: Run tests with coverage (optional)
+        run: |
+          cd web
+          npm test -- --coverage --watchAll=false
+        continue-on-error: true
