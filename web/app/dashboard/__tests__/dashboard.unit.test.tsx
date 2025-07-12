@@ -34,7 +34,7 @@ const createQueryBuilder = (mockFn: jest.Mock) => {
 };
 
 // Mock the supabaseClient module
-jest.mock('lib/supabaseClient', () => ({
+jest.mock('@/lib/supabaseClient', () => ({
   supabase: {
     from: jest.fn(() => createQueryBuilder(mockSelect)),
     storage: {
