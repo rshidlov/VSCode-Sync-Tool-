@@ -5,8 +5,8 @@ import '@testing-library/jest-dom';
 import DashboardPage from '../page';
 
 // Mock supabaseClient - Jest will automatically use the mock file
-jest.mock('lib/supabaseClient.ts');
-import { mockInsert, mockSelect, mockDelete, mockUpdate, mockUpload, mockGetPublicUrl, mockGetUser, mockSignOut, chain } from 'lib/__mocks__/supabaseClient.ts';
+jest.mock('../../../lib/supabaseClient.ts');
+import { mockInsert, mockSelect, mockDelete, mockUpdate, mockUpload, mockGetPublicUrl, mockGetUser, mockSignOut, chain } from '../../../lib/__mocks__/supabaseClient.ts';
 
 // Mock next/navigation useRouter
 jest.mock('next/navigation', () => ({
