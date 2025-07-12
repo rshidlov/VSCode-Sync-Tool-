@@ -4,9 +4,51 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import DashboardPage from '../page';
 
-// Mock supabaseClient - Jest will automatically use the mock file
-jest.mock('../../../lib/supabaseClient.ts');
-import { mockInsert, mockSelect, mockDelete, mockUpdate, mockUpload, mockGetPublicUrl, mockGetUser, mockSignOut, chain } from '../../../lib/__mocks__/supabaseClient.ts';
+// Create mocks inline
+const mockInsert = jest.fn();
+const mockSelect = jest.fn();
+const mockDelete = jest.fn();
+const mockUpdate = jest.fn();
+const mockUpload = jest.fn();
+const mockGetPublicUrl = jest.fn();
+const mockGetUser = jest.fn();
+const mockSignOut = jest.fn();
+
+// Create a chainable query builder mock
+const createQueryBuilder = (mockFn: jest.Mock) => {
+  const builder = {
+    select: jest.fn(() => builder),
+    insert: jest.fn(() => builder),
+    update: jest.fn(() => builder),
+    delete: jest.fn(() => builder),
+    eq: jest.fn(() => builder),
+    in: jest.fn(() => builder),
+    order: jest.fn(() => builder),
+    then: jest.fn((callback) => {
+      const result = mockFn();
+      if (callback) callback(result);
+      return Promise.resolve(result);
+    }),
+  };
+  return builder;
+};
+
+// Mock the supabaseClient module
+jest.mock('../../../lib/supabaseClient.ts', () => ({
+  supabase: {
+    from: jest.fn(() => createQueryBuilder(mockSelect)),
+    storage: {
+      from: jest.fn(() => ({
+        upload: jest.fn(() => mockUpload()),
+        getPublicUrl: jest.fn(() => mockGetPublicUrl()),
+      })),
+    },
+    auth: {
+      getUser: jest.fn(() => mockGetUser()),
+      signOut: jest.fn(() => mockSignOut()),
+    },
+  },
+}));
 
 // Mock next/navigation useRouter
 jest.mock('next/navigation', () => ({
@@ -23,10 +65,10 @@ describe('DashboardPage Unit', () => {
     // Always resolve to a user
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user1', email: 'test@example.com', user_metadata: {} } }, error: null });
     // Always resolve to a profile so the dashboard renders
-    chain.__setSelectResolved({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
-    chain.__setInsertResolved({ error: null });
-    chain.__setDeleteResolved({ error: null });
-    chain.__setUpdateResolved({ error: null });
+    mockSelect.mockResolvedValue({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
+    mockInsert.mockResolvedValue({ error: null });
+    mockDelete.mockResolvedValue({ error: null });
+    mockUpdate.mockResolvedValue({ error: null });
     mockUpload.mockResolvedValue({ error: null });
     // Set profilesLoading to false by default
     Object.defineProperty(window, 'setProfilesLoading', { value: () => {}, writable: true });
@@ -64,7 +106,7 @@ describe('DashboardPage Unit', () => {
   it('validates file upload: allows .json, .vsix, .zip and rejects others', async () => {
     render(<DashboardPage />);
     await waitFor(() => expect(screen.getByText('Dashboard')).toBeInTheDocument());
-    chain.__setSelectResolved({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
+    mockSelect.mockResolvedValue({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
     const fileTypes = [
       { name: 'settings.json', type: 'application/json', shouldPass: true },
       { name: 'ext.vsix', type: 'application/octet-stream', shouldPass: true },
@@ -88,7 +130,7 @@ describe('DashboardPage Unit', () => {
   it('deletes a profile and its files', async () => {
     render(<DashboardPage />);
     await waitFor(() => expect(screen.getByText('Dashboard')).toBeInTheDocument());
-    chain.__setSelectResolved({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
+    mockSelect.mockResolvedValue({ data: [{ id: 'profile1', name: 'Profile 1', user_id: 'user1', is_public: false, created_at: '', updated_at: '' }], error: null });
     await waitFor(() => {
       expect(mockDelete.mock.calls.length).toBe(0);
     });
