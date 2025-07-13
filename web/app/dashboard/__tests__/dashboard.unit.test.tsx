@@ -3,52 +3,12 @@ import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import DashboardPage from '../page';
+import { supabase, mockSelect, mockInsert, mockDelete, mockUpdate, mockUpload, mockGetUser, mockSignOut } from '../../../lib/supabaseClient';
 
-// Create mocks inline
-const mockInsert = jest.fn();
-const mockSelect = jest.fn();
-const mockDelete = jest.fn();
-const mockUpdate = jest.fn();
-const mockUpload = jest.fn();
-const mockGetPublicUrl = jest.fn();
-const mockGetUser = jest.fn();
-const mockSignOut = jest.fn();
+// Mocks are imported from lib/__mocks__/supabaseClient.ts
 
-// Create a chainable query builder mock
-const createQueryBuilder = (mockFn: jest.Mock) => {
-  const builder = {
-    select: jest.fn(() => builder),
-    insert: jest.fn(() => builder),
-    update: jest.fn(() => builder),
-    delete: jest.fn(() => builder),
-    eq: jest.fn(() => builder),
-    in: jest.fn(() => builder),
-    order: jest.fn(() => builder),
-    then: jest.fn((callback) => {
-      const result = mockFn();
-      if (callback) callback(result);
-      return Promise.resolve(result);
-    }),
-  };
-  return builder;
-};
-
-// Mock the supabaseClient module
-jest.mock('../../../lib/supabaseClient', () => ({
-  supabase: {
-    from: jest.fn(() => createQueryBuilder(mockSelect)),
-    storage: {
-      from: jest.fn(() => ({
-        upload: jest.fn(() => mockUpload()),
-        getPublicUrl: jest.fn(() => mockGetPublicUrl()),
-      })),
-    },
-    auth: {
-      getUser: jest.fn(() => mockGetUser()),
-      signOut: jest.fn(() => mockSignOut()),
-    },
-  },
-}));
+// Mock the supabaseClient module - Jest will automatically use the mock in lib/__mocks__/supabaseClient.ts
+jest.mock('../../../lib/supabaseClient');
 
 // Mock next/navigation useRouter
 jest.mock('next/navigation', () => ({
