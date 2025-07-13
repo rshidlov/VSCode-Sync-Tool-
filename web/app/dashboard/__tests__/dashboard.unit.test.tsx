@@ -3,12 +3,12 @@ import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import DashboardPage from '../page';
-import { supabase, mockSelect, mockInsert, mockDelete, mockUpdate, mockUpload, mockGetUser, mockSignOut } from '../../../lib/supabaseClient';
+import { supabase, mockSelect, mockInsert, mockDelete, mockUpdate, mockUpload, mockGetUser, mockSignOut } from '@/lib/supabaseClient';
 
 // Mocks are imported from lib/__mocks__/supabaseClient.ts
 
 // Mock the supabaseClient module - Jest will automatically use the mock in lib/__mocks__/supabaseClient.ts
-jest.mock('../../../lib/supabaseClient');
+jest.mock('@/lib/supabaseClient');
 
 // Mock next/navigation useRouter
 jest.mock('next/navigation', () => ({

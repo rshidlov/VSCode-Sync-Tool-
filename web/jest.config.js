@@ -13,6 +13,7 @@ module.exports = {
   moduleDirectories: ['node_modules', '<rootDir>'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^@/lib/(.*)$': '<rootDir>/lib/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
