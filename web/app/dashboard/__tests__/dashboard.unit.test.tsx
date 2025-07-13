@@ -33,22 +33,25 @@ const createQueryBuilder = (mockFn: jest.Mock) => {
   return builder;
 };
 
-// Mock the supabaseClient module
-jest.mock('@/lib/supabaseClient', () => ({
-  supabase: {
-    from: jest.fn(() => createQueryBuilder(mockSelect)),
-    storage: {
-      from: jest.fn(() => ({
-        upload: jest.fn(() => mockUpload()),
-        getPublicUrl: jest.fn(() => mockGetPublicUrl()),
-      })),
+// Mock the supabaseClient module at the module level
+jest.mock('../../../lib/supabaseClient', () => {
+  return {
+    __esModule: true,
+    supabase: {
+      from: jest.fn(() => createQueryBuilder(mockSelect)),
+      storage: {
+        from: jest.fn(() => ({
+          upload: jest.fn(() => mockUpload()),
+          getPublicUrl: jest.fn(() => mockGetPublicUrl()),
+        })),
+      },
+      auth: {
+        getUser: jest.fn(() => mockGetUser()),
+        signOut: jest.fn(() => mockSignOut()),
+      },
     },
-    auth: {
-      getUser: jest.fn(() => mockGetUser()),
-      signOut: jest.fn(() => mockSignOut()),
-    },
-  },
-}));
+  };
+});
 
 // Mock next/navigation useRouter
 jest.mock('next/navigation', () => ({
