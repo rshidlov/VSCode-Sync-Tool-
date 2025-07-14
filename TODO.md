@@ -48,4 +48,19 @@ This file tracks upcoming features, improvements, and deployment steps for both 
 
 ---
 
+## Future Features & Monetization (Extension & Marketplace)
+
+- [ ] VSCode/Cursor extension: authentication (GitHub/email), backup creation, profile management, apply/switch profiles
+- [ ] Extension: show warning and require confirmation for destructive actions (e.g., switch profile)
+- [ ] Extension: enforce limits for free users (e.g., number of profiles, switch feature)
+- [ ] Extension: integrate with payment system for premium features
+- [ ] Public Marketplace: allow users to share their setups (extensions and settings)
+- [ ] Marketplace: search and filter by category (e.g., Python, Backend, Frontend, Data Science, etc.)
+- [ ] Marketplace: allow users to like/favorite setups (ranking by popularity)
+- [ ] Marketplace: allow users to copy/import public setups to their own profiles
+- [ ] Marketplace: moderation and reporting tools for shared setups
+- [ ] Marketplace: featured and trending profiles
+- [ ] Monetization: restrict marketplace sharing/importing to premium users or add limits for free users
+- [ ] Monetization: offer team/organization plans for shared setups
+
 Add new items below as needed!
